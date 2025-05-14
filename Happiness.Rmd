@@ -1,0 +1,123 @@
+---
+title: "Happingess Rankings Correlation"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(ggplot2)
+library(readr)
+setwd("/Users/jonatanquintana/Downloads")
+Happy <- read.csv("2015.csv")
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+distinct(Happy, Region)
+Happy$Continent <- NA
+Happy
+
+Happy$Continent[which(Happy$Region %in% c("Australia and New Zealand"))] <- "Australia"
+Happy$Continent[which(Happy$Region %in% c("North America"))] <- "North America"
+Happy$Continent[which(Happy$Region %in% c("Sub-Saharan Africa", "Middle East and Northern Africa"))] <- "Africa"
+Happy$Continent[which(Happy$Region %in% c("Western Europe", "Central and Eastern Europe"))] <- "Europe"
+Happy$Continent[which(Happy$Region %in% c("Eastern Asia", "Southeastern Asia", "Southern Asia"))] <- "Asia"
+Happy$Continent[which(Happy$Region %in% c("Latin America and Caribbean"))] <- "South America"
+
+life <- aggregate(Happy[,2:8], list(Happy$Region), mean)
+
+Happy %>% 
+  rename(health.life = Health..Life.Expectancy.) %>% 
+  group_by(Continent) %>% 
+  summarise("Average_Happiness_Score" = mean(Happiness.Score, 1)) %>% 
+  ggplot(aes(x = reorder(Continent, - Average_Happiness_Score), y = Average_Happiness_Score, fill
+             = Continent)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label = Average_Happiness_Score), vjust = -0.2) +
+  theme_classic() +
+  theme(axis.text.x = element_text(vjust = .7)) + 
+  theme(legend.position = "none") + 
+  labs(title = "Average Happines Rank by Continent",
+       subtitle = "Happiness levels >= 7 considered good while levels <= 5 \n considered unhappy",
+       x = NULL,
+       y = "Score") + 
+  scale_fill_manual(values = c("Australia" = "#f4d03f",
+                               "North America" = "#f1c40f",
+                               "South America" = "#d4ac0d",
+                               "Europe" = "#b7950b",
+                               "Asia" = "#9a7d0a",
+                               "Africa" = "#7d6608"))
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+life %>% 
+  select(Group.1, Happiness.Score, Health..Life.Expectancy.) %>% 
+  rename(Health.Life = Health..Life.Expectancy.,
+         Region = Group.1) %>% 
+  group_by(Region) %>% 
+  ggplot(aes(x = Happiness.Score, y = Health.Life)) + 
+  geom_point(aes(color = Region,
+                 size = 0.3)) + 
+  geom_smooth(method = "lm",
+              se = F) + 
+  theme_classic() + 
+  theme(legend.position = "none") + 
+  labs(title = "How Health & Life affects Happiness \n Score by Regions",
+       x = "Happiness Score",
+       y = "Health Life") + 
+  scale_color_manual(values = c("Australia and New Zealand" = "#2e86c1",
+                                "North America" = "#6c3483",
+                                "Western Europe" = "#2e4053",
+                                "Central and Eastern Europe" = "#2e4053",
+                                "Sub-Saharan Africa" = "#f39c12",
+                                "Middle East and Northern Africa" = "#f39c12",
+                                "Eastern Asia" = "#239b56", 
+                                "Southeastern Asia" = "#239b56",
+                                "Southern Asia" = "#239b56", 
+                                "Latin America and Caribbean" = "#a93226"))
+```
+
+### Chart C
+
+```{r}
+life %>% 
+  select(Group.1, Happiness.Score, Economy..GDP.per.Capita.) %>% 
+  rename(Economy.GDP = Economy..GDP.per.Capita.,
+         Region = Group.1) %>% 
+  group_by(Region) %>% 
+  ggplot(aes(x = Happiness.Score, y = Economy.GDP)) + 
+  geom_point(aes(color = Region,
+                 size = 0.3)) + 
+  geom_smooth(method = "lm",
+              se = F) +
+  theme_classic() + 
+  theme(legend.position = "none") +
+  labs(title = "How GDP per capita affects Happiness \n Score by Region", 
+        x = "Happiess Score",
+        y = "GDP per capita") + 
+  scale_y_continuous(limits = c(0, 1.5)) + 
+  scale_color_manual(values = c("Australia and New Zealand" = "#2e86c1",
+                                "North America" = "#6c3483",
+                                "Western Europe" = "#2e4053",
+                                "Central and Eastern Europe" = "#2e4053",
+                                "Sub-Saharan Africa" = "#f39c12",
+                                "Middle East and Northern Africa" = "#f39c12",
+                                "Eastern Asia" = "#239b56", 
+                                "Southeastern Asia" = "#239b56",
+                                "Southern Asia" = "#239b56", 
+                                "Latin America and Caribbean" = "#a93226"))
+```
+
