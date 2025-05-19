@@ -15,15 +15,13 @@ setwd("/Users/jonatanquintana/Downloads")
 Happy <- read.csv("2015.csv")
 ```
 
-Column {data-width=650}
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Chart A
 
 ```{r}
-distinct(Happy, Region)
 Happy$Continent <- NA
-Happy
 
 Happy$Continent[which(Happy$Region %in% c("Australia and New Zealand"))] <- "Australia"
 Happy$Continent[which(Happy$Region %in% c("North America"))] <- "North America"
@@ -45,7 +43,7 @@ Happy %>%
   theme_classic() +
   theme(axis.text.x = element_text(vjust = .7)) + 
   theme(legend.position = "none") + 
-  labs(title = "Average Happines Rank by Continent",
+  labs(title = "Average Happiness Rank by Continent",
        subtitle = "Happiness levels >= 7 considered good while levels <= 5 \n considered unhappy",
        x = NULL,
        y = "Score") + 
@@ -57,67 +55,88 @@ Happy %>%
                                "Africa" = "#7d6608"))
 ```
 
-Column {data-width=350}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
-### Chart B
+### Chart B(Interactive)
 
 ```{r}
-life %>% 
+Health <- life %>% 
   select(Group.1, Happiness.Score, Health..Life.Expectancy.) %>% 
   rename(Health.Life = Health..Life.Expectancy.,
          Region = Group.1) %>% 
   group_by(Region) %>% 
-  ggplot(aes(x = Happiness.Score, y = Health.Life)) + 
-  geom_point(aes(color = Region,
-                 size = 0.3)) + 
-  geom_smooth(method = "lm",
-              se = F) + 
-  theme_classic() + 
-  theme(legend.position = "none") + 
-  labs(title = "How Health & Life affects Happiness \n Score by Regions",
-       x = "Happiness Score",
-       y = "Health Life") + 
-  scale_color_manual(values = c("Australia and New Zealand" = "#2e86c1",
-                                "North America" = "#6c3483",
-                                "Western Europe" = "#2e4053",
-                                "Central and Eastern Europe" = "#2e4053",
-                                "Sub-Saharan Africa" = "#f39c12",
-                                "Middle East and Northern Africa" = "#f39c12",
-                                "Eastern Asia" = "#239b56", 
-                                "Southeastern Asia" = "#239b56",
-                                "Southern Asia" = "#239b56", 
-                                "Latin America and Caribbean" = "#a93226"))
+  mutate(Health.Life = round(Health.Life, 2)) %>% 
+  mutate(Happiness.Score = round(Happiness.Score, 2))
+
+p <- plot_ly(data = Health,
+             x = ~Happiness.Score,
+             y = ~Health.Life,
+             color = ~Region,
+             colors = c(
+               "Australia and New Zealand" = "#2e86c1",
+               "North America" = "#6c3483",
+               "Western Europe" = "#2e4053",
+               "Central and Eastern Europe" = "#2e4053",
+               "Sub-Saharan Africa" = "#f39c12",
+               "Middle East and Northern Africa" = "#f39c12",
+               "Eastern Asia" = "#239b56", 
+               "Southeastern Asia" = "#239b56",
+               "Southern Asia" = "#239b56", 
+               "Latin America and Caribbean" = "#a93226"
+             ),
+             type = 'scatter',
+             mode = 'markers',
+             text = ~Region) %>% 
+  layout(title = 'list'(text = 'Health affect on happiness score by Region',
+                        y = 0.97,
+                        x = 0.45),
+         yaxis = list(title = 'Health Score'),
+         xaxis = list(title = 'Happiness Score')) %>% 
+  layout(showlegend = FALSE)
+
+p %>%
+  config(displayModeBar = FALSE)
 ```
 
-### Chart C
+### Chart C(Interactive)
 
 ```{r}
-life %>% 
+Economy <- life %>% 
   select(Group.1, Happiness.Score, Economy..GDP.per.Capita.) %>% 
   rename(Economy.GDP = Economy..GDP.per.Capita.,
          Region = Group.1) %>% 
   group_by(Region) %>% 
-  ggplot(aes(x = Happiness.Score, y = Economy.GDP)) + 
-  geom_point(aes(color = Region,
-                 size = 0.3)) + 
-  geom_smooth(method = "lm",
-              se = F) +
-  theme_classic() + 
-  theme(legend.position = "none") +
-  labs(title = "How GDP per capita affects Happiness \n Score by Region", 
-        x = "Happiess Score",
-        y = "GDP per capita") + 
-  scale_y_continuous(limits = c(0, 1.5)) + 
-  scale_color_manual(values = c("Australia and New Zealand" = "#2e86c1",
-                                "North America" = "#6c3483",
-                                "Western Europe" = "#2e4053",
-                                "Central and Eastern Europe" = "#2e4053",
-                                "Sub-Saharan Africa" = "#f39c12",
-                                "Middle East and Northern Africa" = "#f39c12",
-                                "Eastern Asia" = "#239b56", 
-                                "Southeastern Asia" = "#239b56",
-                                "Southern Asia" = "#239b56", 
-                                "Latin America and Caribbean" = "#a93226"))
+  mutate(Happiness.Score = round(Happiness.Score, 2)) %>% 
+  mutate(Economy.GDP = round(Economy.GDP, 2))
+
+P <- plot_ly(data = Economy,
+             x = ~Happiness.Score,
+             y = ~Economy.GDP,
+             color = ~Region,
+             colors = c(
+                       "Australia and New Zealand" = "#2e86c1",
+               "North America" = "#6c3483",
+               "Western Europe" = "#2e4053",
+               "Central and Eastern Europe" = "#2e4053",
+               "Sub-Saharan Africa" = "#f39c12",
+               "Middle East and Northern Africa" = "#f39c12",
+               "Eastern Asia" = "#239b56", 
+               "Southeastern Asia" = "#239b56",
+               "Southern Asia" = "#239b56", 
+               "Latin America and Caribbean" = "#a93226"
+             ),
+             type = 'scatter',
+             mode = 'markers',
+             text = ~Region) %>% 
+  layout(title = list(text = 'Economy affect on happiness score by Region',
+                      y = 0.97,
+                      x = 0.45),
+         yaxis = list(title = 'Economy GDP'),
+         xaxis = list(title = 'Happiness Score')) %>% 
+  layout(showlegend = FALSE)
+
+P %>% 
+  config(displayModeBar = FALSE)
 ```
 
